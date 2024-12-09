@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="../chatrooms.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+    <div>
+        <h1>Chatrooms</h1>
+        <div id="chatroom-list">
+        </div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io()
+        
+        document.addEventListener("DOMContentLoaded", async () =>{
+            try{
+                const res = await fetch('/chatrooms', {
+                    method:'GET',
+                    credentials: 'include',
+                    headers:{
+                        'Content-Type': 'application/json'
+                    }
+                })
+                
+                const rooms = await res.json()
+                const roomlist = document.getElementById('chatroom-list')
+                
+                roomlist.innerHTML = ''
+                
+                rooms.forEach(room =>{
+                    const listitem = document.createElement("div")
+                    const connectbutton = document.createElement("button")
+                    connectbutton.textContent = `Join ${room.name}`
+                    connectbutton.onclick = () =>{
+                        socket.emit("join room", room.id)
+                        window.location.href = `/chatroom/${room.id}`
+                    }
+                    listitem.appendChild(connectbutton)
+                    roomlist.appendChild(listitem)
+                })
+            } catch(e){
+                console.error("something went wrong", e)
+            }
+        })
+        </script>
+</body>
+</html>

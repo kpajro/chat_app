@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat</title>
+    <link href="../chatroom.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+    <input id="sendinput">
+    <button id="sendbutton">SEND</button>
+    <div id="message-list">
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io()
+        
+        const messages = document.getElementById("message-list")
+
+        const input = document.getElementById("sendinput")
+        const button = document.getElementById("sendbutton")
+
+        button.addEventListener("click", (evt)=>{
+            socket.emit('chat message', input.value)
+        })
+        input.addEventListener("keypress", (evt)=>{
+            if(evt.keyCode == 13){
+                socket.emit('chat message', input.value)
+            }
+        })
+        socket.on('chat message', (msg) => {
+            const item = document.createElement('span')
+            item.textContent = msg
+            messages.appendChild(item)
+            window.scrollTo(0, document.body.scrollHeight)
+        })
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="../login.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+    <div class="space">
+        <div class="right-side centered">
+            <h1>LOGIN</h1>
+            <input id="email" type="email" placeholder="Email" />
+            <input id="password" type="password" placeholder="Password" />
+            <img id="login-button" alt="login" src="../icons/Login.png">
+        </div>
+    </div>
+    <script>
+        let logbutton = document.getElementById("login-button")
+        logbutton.addEventListener("click", () =>{
+            const email = document.getElementById("email").value
+            const password = document.getElementById("password").value
+            fetch("/login", {
+                method: "POST",
+                headers: {'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password}),
+            })
+            .then(res =>{
+                if(res.ok){
+                    alert("logged in")
+                }else{
+                    alert("Login failed")
+                }
+            })
+        })
+    </script>
+</body>
+</html>

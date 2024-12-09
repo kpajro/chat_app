@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="../adminpanel.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+
+    <div id="user-list" class="users-container">
+        <h1>Users</h1>
+    </div>
+    <div id="chatroom-list" class="chatroom-container">
+        <h1>Chatrooms</h1>
+        <button id="createbutton">Add new Chatroom</button>
+        <input id="createinput" placeholder="Type in a chatroom name...">
+    </div>
+
+    <script>
+        
+        async function createRoom(chatroom){
+            const users = document.getElementById("user-list")
+            const rooms = document.getElementById("chatroom-list")
+            const chatroomitem = document.createElement("div")
+            const chatroomname = document.createElement("span")
+            const deletebutton = document.createElement("img")
+            deletebutton.src = "../icons/Trash.png"
+            deletebutton.addEventListener("click", async ()=>{
+                const res = await fetch(`/deleteroom/${chatroom.id}`, {
+                    method: "DELETE",
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                if(res.ok){
+                    chatroomitem.remove()
+                }
+            })
+            chatroomitem.className = "chatroom-item"
+            chatroomname.textContent = chatroom.name
+            chatroomitem.appendChild(chatroomname)
+            chatroomitem.appendChild(deletebutton)
+            rooms.appendChild(chatroomitem)
+        }
+
+        document.addEventListener("DOMContentLoaded", async ()=>{
+            try{
+                const userres = await fetch("/users",{
+                    method:'GET',
+                    credentials: 'include',
+                    headers:{
+                        'Content-Type': 'application/json'
+                    }
+                })
+                const chatroomres = await fetch("/chatrooms", {
+                    method:'GET',
+                    credentials: "include",
+                    headers:{
+                        'Content-Type': 'application/json'
+                    }
+                })
+                
+                const createbutton = document.getElementById("createbutton")
+                const createinput = document.getElementById("createinput")
+                const users = document.getElementById("user-list")
+                const rooms = document.getElementById("chatroom-list")
+                const usersjson = await userres.json()
+                const chatroomsjson = await chatroomres.json()
+
+                createbutton.addEventListener("click", async ()=>{
+                    const name = createinput.value
+                    const res = await fetch("/createroom", {
+                        method: 'POST',
+                        credentials: "include",
+                        headers: {"Content-Type": "application/json"},
+                        body: JSON.stringify({name})
+                    })
+                    if(res.ok){
+                        const chatroom = await res.json()
+                        createRoom(chatroom)
+                    }
+                })
+
+                usersjson.forEach(user => {
+                    const useritem = document.createElement("div")
+                    const usermail = document.createElement("p")
+                    const userId = document.createElement("span")
+                    userId.textContent = "ID : " + user.id
+                    usermail.textContent = "Email : " + user.email
+                    useritem.appendChild(userId)
+                    useritem.appendChild(usermail)
+                    users.appendChild(useritem)
+                })
+
+                chatroomsjson.forEach(chatroom =>{
+                    createRoom(chatroom)
+                })
+            } catch(e){
+                console.error("something went wrong", e)
+            }
+        })
+    </script>
+</body>
+</html>

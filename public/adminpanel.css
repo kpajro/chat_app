@@ -1,0 +1,39 @@
+body {
+    width: 100vw;
+    height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+img{
+    width: 16px;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+h1{
+    text-align: center;
+}
+
+.users-container{
+    display: table;
+    justify-self: center;
+}
+
+.chatroom-container{
+    display: table;
+    justify-self: center;
+}
+
+.chatroom-item{
+    display: flex;
+    width: auto;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    border-width: 2px;
+    border-style: solid;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    border-color: rgb(206, 219, 219)
+}

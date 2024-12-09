@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="../register.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+    <div class="register-box">
+        <h1>REGISTER</h1>
+        <input id="email" type="email" placeholder="Email" />
+        <input id="password" type="password" placeholder="Password" />
+        <img id="register-button" src="../icons/Register.png">
+    </div>
+    <script>
+        let regbutton = document.getElementById("register-button")
+        regbutton.addEventListener("click", ()=>{
+            const email = document.getElementById("email").value
+            const password = document.getElementById("password").value
+
+            fetch("/register", {
+                method: 'POST', 
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({email, password}),
+            })
+            .then(res =>{
+                if (res.ok){
+                    window.location.href = '/login'
+                }else {
+                    alert("registration failed")
+                }
+            })
+        })
+    </script>
+</body>
+</html>
