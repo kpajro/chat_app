@@ -127,4 +127,18 @@ router.get('/login', (req, res) => {
     res.sendFile(join(__dirname, 'templates/login.html'))
 })
 
+router.post("/message", (req, res)=>{
+    const { userid, chatroomid, message } = req.body
+
+    const datab = db.getConnection()
+    datab.query("INSERT INTO message (user_id, chatroom_id, message, date_send) VALUES (?, ?, ?, NOW()", (e, result)=>{
+        if(e){
+            return res.status(500).json({ error : "error inserting message"})
+        } else {
+            datab.end()
+            return res.status(200).json({ message: "message inserted"})
+        }
+    })
+})
+
 module.exports = router

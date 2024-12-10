@@ -9,6 +9,7 @@
 <body>
     <div>
         <h1>Chatrooms</h1>
+        <input id="nickname" type="text" placeholder="Your nickname">
         <div id="chatroom-list">
         </div>
     </div>
@@ -36,7 +37,14 @@
                     const connectbutton = document.createElement("button")
                     connectbutton.textContent = `Join ${room.name}`
                     connectbutton.onclick = () =>{
-                        socket.emit("join room", room.id)
+                        const nickname = document.getElementById("nickname").value.trim()
+                        if (!nickname) {
+                            alert("you need to put a nickname")
+                            return
+                        }
+                        socket.emit("join room", { roomid : room.id})
+                        localStorage.setItem("roomId", room.id)
+                        localStorage.setItem("nickname", nickname)
                         window.location.href = `/chatroom/${room.id}`
                     }
                     listitem.appendChild(connectbutton)

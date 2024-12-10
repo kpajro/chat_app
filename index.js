@@ -17,18 +17,24 @@ app.use(route)
 io.on('connection', (socket)=>{
     console.log("user connected")
 
-    socket.on('chat message', (msg) => {
-        io.emit('chat message', msg)
-    })
-
     socket.on("join room", (roomid)=>{
-        socket.join(roomid)
-        io.to(`${roomid}`).emit("user joined the room", "aaa")
+        socket.join("room"+roomid)
+        console.log(io.sockets.adapter.rooms)
+    })
+    
+    socket.on('chat message', ({msg, nickname, roomid}) => {
+        //io.to("room"+roomid).emit('send message', {msg, nickname, roomid})
+        io.to("room"+roomid).emit('send message', {msg, nickname, roomid})
+        console.log(socket.id,'room'+roomid, nickname, msg)
     })
 
     socket.on('disconnect', ()=>{
         console.log("user disconnected")
     })
+
+    socket.onAny((event, ...args) => {
+        console.log(event, args);
+      });
 })
   
 server.listen(3030, () => {

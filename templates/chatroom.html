@@ -18,20 +18,27 @@
 
         const input = document.getElementById("sendinput")
         const button = document.getElementById("sendbutton")
+        const nickname = localStorage.getItem("nickname")
+        const roomid = localStorage.getItem("roomId")
 
         button.addEventListener("click", (evt)=>{
-            socket.emit('chat message', input.value)
-        })
-        input.addEventListener("keypress", (evt)=>{
-            if(evt.keyCode == 13){
-                socket.emit('chat message', input.value)
+            if (input.value.trim()){
+                socket.emit('chat message', { msg: input.value, nickname, roomid })
+                input.value = ''
             }
         })
-        socket.on('chat message', (msg) => {
+        input.addEventListener("keypress", (evt)=>{
+            if(evt.keyCode == 13 && input.value.trim()){
+                socket.emit('chat message', { msg: input.value, nickname, roomid })
+                input.value = ''
+            }
+        })
+
+        socket.on('send message', ({msg, nickname, roomid}) => {
+            console.log("sent!")
             const item = document.createElement('span')
-            item.textContent = msg
+            item.innerHTML = `<strong>${nickname}:</strong> ${msg}`
             messages.appendChild(item)
-            window.scrollTo(0, document.body.scrollHeight)
         })
 
     </script>
