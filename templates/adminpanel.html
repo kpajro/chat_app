@@ -54,7 +54,7 @@
                         'Content-Type': 'application/json'
                     }
                 })
-                const chatroomres = await fetch("/chatrooms", {
+                const chatroomres = await fetch("/reqchatrooms", {
                     method:'GET',
                     credentials: "include",
                     headers:{
@@ -85,12 +85,18 @@
 
                 usersjson.forEach(user => {
                     const useritem = document.createElement("div")
-                    const usermail = document.createElement("p")
+                    const usermail = document.createElement("span")
                     const userId = document.createElement("span")
+                    const userRole = document.createElement("span")
+                    useritem.className = "user-item"
+                    usermail.style.paddingLeft = "16px"
+                    userRole.style.paddingLeft = "16px"
                     userId.textContent = "ID : " + user.id
                     usermail.textContent = "Email : " + user.email
+                    userRole.textContent = "Role : " + user.role
                     useritem.appendChild(userId)
                     useritem.appendChild(usermail)
+                    useritem.appendChild(userRole)
                     users.appendChild(useritem)
                 })
 

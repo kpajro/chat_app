@@ -11,11 +11,36 @@ function validE(e) {
     return patt.test(e);
 }
 
+// --------------------------------------------- LOAD TEMPLATES -------------------------------------------//
+
+router.get("/", (req, res)=>{
+    res.sendFile(join(__dirname, "templates/main.html"))
+})
+
 router.get('/chatroom/:id', mw.authenticationProcess, (req, res) => {
     res.sendFile(join(__dirname, 'templates/chatroom.html'))
 })
 
-router.get("/chatrooms", mw.authenticationProcess, (req, res)=>{
+router.get('/chatrooms', mw.authenticationProcess, (req, res) => {
+    res.sendFile(join(__dirname, 'templates/chatrooms.html'))
+})
+
+router.get('/register', (req, res) => {
+    res.sendFile(join(__dirname, 'templates/register.html'))
+})
+
+router.get('/admin', mw.authenticationProcess ,mw.authenticateAdmin, (req, res)=>{
+    res.sendFile(join(__dirname, "templates/adminpanel.html"))
+})
+
+router.get('/login', (req, res) => {
+    res.sendFile(join(__dirname, 'templates/login.html'))
+})
+
+// ---------------------------------------------- ROUTES ------------------------------------------//
+
+
+router.get("/reqchatrooms", mw.authenticationProcess, (req, res)=>{
     const datab = db.getConnection()
     datab.query("SELECT * FROM chatroom", (e, result)=>{
         if (e){
@@ -27,7 +52,7 @@ router.get("/chatrooms", mw.authenticationProcess, (req, res)=>{
 
 router.get("/users", mw.authenticationProcess, mw.authenticateAdmin, (req, res)=>{
     const datab = db.getConnection()
-    datab.query("SELECT * FROM user", (e, result)=>{
+    datab.query("SELECT id, email, role FROM user", (e, result)=>{
         if(e){
             console.log("error getting users", e)
         }
@@ -61,18 +86,6 @@ router.delete("/deleteroom/:id", mw.authenticationProcess ,mw.authenticateAdmin,
     })
 })
 
-router.get('/chatrooms-page', mw.authenticationProcess, (req, res) => {
-    res.sendFile(join(__dirname, 'templates/chatrooms.html'))
-})
-
-router.get('/register', (req, res) => {
-    res.sendFile(join(__dirname, 'templates/register.html'))
-})
-
-router.get('/admin', mw.authenticationProcess ,mw.authenticateAdmin, (req, res)=>{
-    res.sendFile(join(__dirname, "templates/adminpanel.html"))
-})
-
 router.post('/register', (req,res)=>{
     const { email, password } = req.body
     if(!validE(email)){
@@ -86,9 +99,9 @@ router.post('/register', (req,res)=>{
         if (e){
             return res.status(500).json({ error: "error registering account"})
         }else{
+            datab.end()
             return res.status(200).send("user registered")
         }
-        datab.end()
     })
 })
 
@@ -105,16 +118,20 @@ router.post('/login',(req,res)=>{
                 return res.status(400).send("no logins")
             }
             console.log(user)
-            if(!user && !bcrypt.compare(password, user.password)){
+            console.log(password)
+
+            const isPasswordValid = bcrypt.compareSync(password, user.password)
+
+            if (!isPasswordValid) {
                 return res.status(401).send("not valid")
             }
+
 
             const token =jwt.sign(
                 { email: user.email, id: user.id, role: user.role},
                 process.env.SECRET_JWT_APP,
                 { algorithm: 'HS256', expiresIn: '24h'}
             )
-
             datab.end()
 
             res.cookie('authToken', token, {httpOnly:true, secure: true, maxAge: 86400000})
@@ -123,15 +140,11 @@ router.post('/login',(req,res)=>{
     })
 })
 
-router.get('/login', (req, res) => {
-    res.sendFile(join(__dirname, 'templates/login.html'))
-})
-
-router.post("/message", (req, res)=>{
-    const { userid, chatroomid, message } = req.body
+router.post("/message", mw.authenticationProcess, (req, res)=>{
+    const { username, chatroomid, message } = req.body
 
     const datab = db.getConnection()
-    datab.query("INSERT INTO message (user_id, chatroom_id, message, date_send) VALUES (?, ?, ?, NOW()", (e, result)=>{
+    datab.query("INSERT INTO message (username, chatroom_id, message, date_send) VALUES (?, ?, ?, NOW()", (e, result)=>{
         if(e){
             return res.status(500).json({ error : "error inserting message"})
         } else {

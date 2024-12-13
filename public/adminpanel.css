@@ -1,4 +1,5 @@
 body {
+    background-color: #f0f0f0;
     width: 100vw;
     height: 100vh;
     display: grid;
@@ -23,6 +24,11 @@ h1{
 .chatroom-container{
     display: table;
     justify-self: center;
+}
+
+.user-item{
+    display: flex;
+    padding: 4px;
 }
 
 .chatroom-item{

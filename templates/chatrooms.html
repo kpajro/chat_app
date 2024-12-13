@@ -8,6 +8,7 @@
 </head>
 <body>
     <div>
+        <a href="/">Back</a>
         <h1>Chatrooms</h1>
         <input id="nickname" type="text" placeholder="Your nickname">
         <div id="chatroom-list">
@@ -19,7 +20,7 @@
         
         document.addEventListener("DOMContentLoaded", async () =>{
             try{
-                const res = await fetch('/chatrooms', {
+                const res = await fetch('/reqchatrooms', {
                     method:'GET',
                     credentials: 'include',
                     headers:{
@@ -42,7 +43,6 @@
                             alert("you need to put a nickname")
                             return
                         }
-                        socket.emit("join room", { roomid : room.id})
                         localStorage.setItem("roomId", room.id)
                         localStorage.setItem("nickname", nickname)
                         window.location.href = `/chatroom/${room.id}`

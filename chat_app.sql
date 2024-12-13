@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 09, 2024 at 10:40 PM
+-- Generation Time: Dec 13, 2024 at 01:05 AM
 -- Server version: 10.4.6-MariaDB
 -- PHP Version: 7.2.22
 
@@ -49,7 +49,7 @@ INSERT INTO `chatroom` (`id`, `name`) VALUES
 --
 
 CREATE TABLE `message` (
-  `user_id` int(11) NOT NULL,
+  `username` varchar(100) NOT NULL,
   `chatroom_id` int(11) NOT NULL,
   `message` varchar(1000) NOT NULL,
   `date_send` date NOT NULL
@@ -73,8 +73,9 @@ CREATE TABLE `user` (
 --
 
 INSERT INTO `user` (`id`, `email`, `password`, `role`) VALUES
-(1, 'kokosjestdobry@gmail.com', '$2a$10$.Qh9tIqVrPEofjmmFifRmuWmTvIagz9eCQfIm8GRAGH7EuFVm5pnm', 'admin'),
-(3, 'fudempror@gmail.com', '$2a$10$mNf6KEy92pcTyD1UoJb.h.7hz5hU.VtJHZKYLci/aVqZh6CpnsZPa', 'user');
+(1, 'admin@gmail.com', '$2a$10$nnMePr//yL0iUI/It81JWeoFpVebHXzFk1Qc3RyUYDh4fND88dZTy', 'admin'),
+(2, 'user@gmail.com', '$2a$10$VUy7rv6O/Hr0/P25lpx7lOUXQXUxgDqZW9CK8QhXPBtUUOmz3PpLa', 'user'),
+(3, 'user2@gmail.com', '$2a$10$34M2bRXQ2F0.yGmNWImaQeZlHLfzT3ykbdoqiStyICZJy.x.oUAlW', 'user');
 
 --
 -- Indexes for dumped tables
@@ -90,8 +91,7 @@ ALTER TABLE `chatroom`
 -- Indexes for table `message`
 --
 ALTER TABLE `message`
-  ADD KEY `chatroom_message` (`chatroom_id`),
-  ADD KEY `user_message` (`user_id`);
+  ADD KEY `chatroom_message` (`chatroom_id`);
 
 --
 -- Indexes for table `user`
@@ -107,13 +107,13 @@ ALTER TABLE `user`
 -- AUTO_INCREMENT for table `chatroom`
 --
 ALTER TABLE `chatroom`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- Constraints for dumped tables
@@ -123,8 +123,7 @@ ALTER TABLE `user`
 -- Constraints for table `message`
 --
 ALTER TABLE `message`
-  ADD CONSTRAINT `chatroom_message` FOREIGN KEY (`chatroom_id`) REFERENCES `chatroom` (`id`),
-  ADD CONSTRAINT `user_message` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`);
+  ADD CONSTRAINT `chatroom_message` FOREIGN KEY (`chatroom_id`) REFERENCES `chatroom` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
