@@ -3,7 +3,7 @@ module.exports = (io) => {
     io.on('connection', (socket)=>{
         console.log("user connected")
     
-        socket.on("join room", (data)=>{
+        socket.on("join room", async (data)=>{
             const { nickname , roomid} = data
             socket.join("room"+roomid)
     
@@ -21,19 +21,15 @@ module.exports = (io) => {
         })
     
         socket.on('server message', (data) => {
-            const { nickname, roomid, msg, __createdtime__ } = data
-            io.in("room"+roomid).emit('server message', data)
-            //console.log('room'+roomid, nickname, msg, socket.id)
+            const { nickname, roomid, msg} = data
+            socket.in("room"+roomid).emit('server message', data)
         })
 
         socket.on('client message', (data) => {
-            const { nickname, roomid, msg, __createdtime__ } = data
-            io.in("room"+roomid).emit('client message', data)
-            //console.log(socket.id)
-            //console.log('room'+roomid, nickname, msg, socket.id)
+            const { nickname, roomid, msg } = data
+            socket.emit("save data", data)
+            io.in("room" + roomid).emit('client message', data)
         })
-        
-    
         socket.on('disconnect', ()=>{
             console.log("user disconnected")
         })

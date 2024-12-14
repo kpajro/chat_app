@@ -7,7 +7,7 @@ const mw = require('./middleware')
 const router = express.Router()
 
 function validE(e) {
-    const patt = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const patt = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
     return patt.test(e);
 }
 
@@ -92,21 +92,32 @@ router.post('/register', (req,res)=>{
         return res.status(400).send("incorrect email")
     }
     
-    const hashPassword = bcrypt.hashSync(password, 10)
-
+    const hashedPassword = bcrypt.hashSync(password, 10)
+    
     const datab = db.getConnection()
-    datab.query("INSERT INTO user (email, password) values (?,?)", [email, hashPassword], (e,result)=>{
-        if (e){
-            return res.status(500).json({ error: "error registering account"})
-        }else{
-            datab.end()
-            return res.status(200).send("user registered")
+    datab.query("SELECT * FROM user WHERE email = ?", [email], (e, result) => {
+        if (e) {
+            return res.status(500).json({ error: "error checking email" });
         }
+
+        if (result.length > 0) {
+            datab.end();
+            return res.status(400).send("email exists already");
+    }
+    
+        datab.query("INSERT INTO user (email, password) values (?,?)", [email, hashedPassword], (e,result)=>{
+            if (e){
+                return res.status(500).json({ error: "error registering account"})
+            }else{
+                datab.end()
+                return res.status(200).send("user registered")
+            }
+        })
     })
 })
 
 router.post('/login',(req,res)=>{
-    const { email, password} = req.body
+    const {email, password} = req.body
 
     const datab = db.getConnection()
     datab.query("SELECT * FROM user where email = ?",[email], (e, result)=>{
@@ -118,11 +129,10 @@ router.post('/login',(req,res)=>{
                 return res.status(400).send("no logins")
             }
             console.log(user)
-            console.log(password)
 
-            const isPasswordValid = bcrypt.compareSync(password, user.password)
+            const isvalid = bcrypt.compareSync(password, user.password)
 
-            if (!isPasswordValid) {
+            if (!isvalid) {
                 return res.status(401).send("not valid")
             }
 
@@ -135,21 +145,39 @@ router.post('/login',(req,res)=>{
             datab.end()
 
             res.cookie('authToken', token, {httpOnly:true, secure: true, maxAge: 86400000})
+            res.cookie('userid', {id: user.id},{httpOnly:true, secure: true, maxAge: 86400000})
             return res.status(200).send("logged in")
         }
     })
 })
 
 router.post("/message", mw.authenticationProcess, (req, res)=>{
-    const { username, chatroomid, message } = req.body
+    const { username, chatroom_id, message} = req.body
+    const user_id = req.cookies.userid.id
+    console.log(req.body)
+    console.log(user_id)
+
 
     const datab = db.getConnection()
-    datab.query("INSERT INTO message (username, chatroom_id, message, date_send) VALUES (?, ?, ?, NOW()", (e, result)=>{
+    datab.query("INSERT INTO message (username, user_id, chatroom_id, message, date_send) VALUES (?, ?, ?, ?, SYSDATE())", [username, user_id, chatroom_id, message], (e, result)=>{
         if(e){
             return res.status(500).json({ error : "error inserting message"})
         } else {
             datab.end()
             return res.status(200).json({ message: "message inserted"})
+        }
+    })
+})
+
+router.get("/messages", mw.authenticationProcess, (req, res)=>{
+    const { chatroom_id } = req.query
+    const datab = db.getConnection()
+    datab.query("SELECT * FROM message where chatroom_id = ? ORDER BY date_send DESC LIMIT 50", [chatroom_id], (e, result)=>{
+        if (e){
+            return res.status(500).json({error: "error getting messages"})
+        } else {
+            datab.end()
+            res.json(result)
         }
     })
 })

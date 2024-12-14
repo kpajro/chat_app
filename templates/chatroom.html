@@ -24,7 +24,65 @@
         const nickname = localStorage.getItem("nickname")
         const roomid = localStorage.getItem("roomId")
 
-        async function saveMessage(nickname, roomid, msg){
+        async function getMessages(roomid){
+            try {
+                const url = `/messages?chatroom_id=${encodeURIComponent(roomid)}`
+                const resmessages = await fetch(url, {
+                    method: 'GET',
+                    credentials: "include",
+                    headers:{
+                        'Content-Type': 'application/json'
+                    }
+                })
+                const pastmessages = await resmessages.json()
+                //console.log(pastmessages)
+                pastmessages.forEach(msg => {
+                    //console.log(msg)
+                    const item = createMessage(msg.username,msg.message)
+                    messages.appendChild(item)
+                })
+            } catch(e){
+                console.error("error",e)
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", ()=>{
+            socket.emit("join room", { nickname, roomid})
+            getMessages(roomid)
+        })
+
+        button.addEventListener("click", (evt)=>{
+            //console.log("function fired")
+            if (input.value.trim()){
+                socket.emit('client message', { nickname, roomid, msg: input.value})
+                input.value = ''                
+            }
+        })
+
+        input.addEventListener("keypress", (evt)=>{
+            //console.log("function fired")
+            if(evt.keyCode == 13 && input.value.trim()){
+                console.log(input.value)
+                socket.emit('client message', { nickname, roomid, msg: input.value})
+                input.value = ''
+            }
+        })
+
+        function createMessage(nickname, msg) {
+            const item = document.createElement('span')
+
+            const nickname_ = document.createElement('strong')
+            nickname_.textContent = `${nickname} :`
+            item.appendChild(nickname_)
+
+            const message_ = document.createTextNode(` ${msg}`)
+            item.appendChild(message_)
+
+            return item
+        }
+
+        socket.on('save data', async (data)=>{
+            const { nickname, roomid, msg} = data
             try {
                 const res = await fetch("/message", {
                     method: 'POST',
@@ -32,55 +90,28 @@
                     headers:{
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({username: nickname, chatroomid: roomid, message: msg})
+                    body: JSON.stringify({username: nickname, chatroom_id: roomid, message: msg})
                 })
                 if(!res.ok){
-                    throw new Error("failed to save message")
+                    const err = await res.text()
+                    throw new Error(`failed to save message ${err}`)
                 }
             }catch(e){
                 console.error("error", e)
             }
-
-        }
-
-        document.addEventListener("DOMContentLoaded", ()=>{
-            socket.emit("join room", { nickname, roomid})
-        })
-
-        button.addEventListener("click", (evt)=>{
-            console.log("function fired")
-            if (input.value.trim()){
-                const __createdtime__ = Date.now()
-                socket.emit('client message', { nickname, roomid, msg: input.value, __createdtime__})
-                input.value = ''
-            }
-        })
-
-        input.addEventListener("keypress", (evt)=>{
-            console.log("function fired")
-            if(evt.keyCode == 13 && input.value.trim()){
-                console.log(input.value)
-                const __createdtime__ = Date.now()
-                socket.emit('client message', { nickname, roomid, msg: input.value, __createdtime__})
-                input.value = ''
-            }
         })
 
         socket.on('server message', (data)=>{
-            console.log("server message sent!")
+            //console.log("server message sent!")
             const { nickname, msg} = data
-            const item = document.createElement('span')
-            item.innerHTML = `<strong>${nickname}:</strong> ${msg}`
+            const item = createMessage(nickname, msg)
             messages.appendChild(item)
             messages.scrollTop = messages.scrollHeight
-            console.log(data)
         })
 
         socket.on('client message', ({msg, nickname, roomid}) => {
-            saveMessage({nickname, roomid, msg})
-            console.log("user message sent!")
-            const item = document.createElement('span')
-            item.innerHTML = `<strong>${nickname}:</strong> ${msg}`
+            //console.log("user message sent!")
+            const item = createMessage(nickname, msg)
             item.className = "message"
             messages.appendChild(item)
             messages.scrollTop = messages.scrollHeight
