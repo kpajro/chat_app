@@ -1,0 +1,20 @@
+{
+  "name": "chat_app",
+  "version": "1.0.0",
+  "description": "- Import the SQL file into your MySQL Workbench or PHPMyAdmin.\r - Install necessary packages with npm : ```npm install express mysql2 socket.io bcryptjs dotenv jsonwebtoken cookie-parser```\r - Open the console inside the folder and type in the command : ```node index.js```\r - The app is hosted under localhost on port 3030\r - Go to ``` localhost:3030 ```\r > Admin credentials : email = admin@gmail.com | password = admin",
+  "homepage": "https://github.com/kpajro/chat_app#readme",
+  "bugs": {
+    "url": "https://github.com/kpajro/chat_app/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kpajro/chat_app.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
